@@ -38,49 +38,26 @@ short* fileData;
 int sampleRateSource, sampleRateImpulse; // for later discrepancy checking as this program needs identical input file sample rates to function
 int size;
 
-float *readWav(char *filename, float *signal);
-void writeWav(char *fileName, float *signal, int signalSize);
+string requestFileName(string fileNameIn);
 
-//void four1(float data[], int nn, int isign);
-//void four1Scaling (float signal[], int inputSignalSize);
+float *readWav(string filename, float *signal);
+void writeWav(string fileName, float *signal, int signalSize);
 
 void convolutionProcess(float *x, int inputSignalSize, float *h, int responseSignalSize, float *y, int outputSignalSize);
 
 int main()
 {
-    clock_t begin = clock();
 
-    // this section should be fairly easy to understand without much commenting
+    string sourceFileName, responseFileName, outputFileName;
 
-    std::string sourceFileNameStr, responseFileNameStr, outputFileNameStr;
-    cout << "What is the source file name?" << endl;
-    cin >> sourceFileNameStr;
+    sourceFileName = requestFileName("input");
+    responseFileName = requestFileName("response");
+    outputFileName = requestFileName("output");
 
-    char *sourceFileName = new char[sourceFileNameStr.length()+1]; // string to char conversion
-    strcpy(sourceFileName, sourceFileNameStr.c_str());
-    sourceFileName[sourceFileNameStr.length()] = 0;
-
-    cout << "What is the response file name (type 'same' to use source file as response)?" << endl;
-    cin >> responseFileNameStr;
-    if (responseFileNameStr == "same"){ // can't just set it as nothing while using cin unfortunately
-        responseFileNameStr = sourceFileNameStr;
-    }
-
-    char *responseFileName = new char[responseFileNameStr.length()+1]; // string to char conversion
-    strcpy(responseFileName, responseFileNameStr.c_str());
-    responseFileName[responseFileNameStr.length()] = 0;
-
-    cout << "What is the output file name?" << endl;
-    cin >> outputFileNameStr;
-
-    char *outputFileName = new char[outputFileNameStr.length()+1]; // string to char conversion
-    strcpy(outputFileName, outputFileNameStr.c_str());
-    outputFileName[outputFileNameStr.length()] = 0;
-
-	/*if (argc != 4) {
-        cout << "Type 'convolve help' for some program options." << endl;
-        return 0;
-    }    */
+    /*
+    if (responseFileName == "same") // can't just set it as nothing while using cin unfortunately
+    responseFileName = sourceFileName;
+    */
 
     int inputSignalSize, responseSignalSize, outputSignalSize;
 
@@ -105,8 +82,8 @@ int main()
 
     outputSignalSize = inputSignalSize + responseSignalSize - 1;
     y = new float[outputSignalSize];
-
-    cout << "Beginning Process." << endl;
+    clock_t begin = clock();
+    cout << "Starting Process / Clock." << endl;
 
     convolutionProcess(x, inputSignalSize, h, responseSignalSize, y, outputSignalSize);
 
@@ -114,16 +91,16 @@ int main()
 
     clock_t end = clock();
     double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
-    cout << "Convolution finished in " << elapsed_secs << " seconds." << endl;
+    cout << "Done. Convolution finished in " << elapsed_secs << " seconds." << endl;
 
     return 0;
 }
 
 // reads in a wav file into an array
-float *readWav (char *filename, float *signal)
+float *readWav (string filename, float *signal)
 {
 
-	ifstream inputfile(filename, ios::in | ios::binary);
+	ifstream inputfile(filename.c_str(), ios::in | ios::binary);
 
 	inputfile.seekg(ios::beg);
 
@@ -169,10 +146,10 @@ float *readWav (char *filename, float *signal)
 }
 
 // writes a signal to a wav file
-void writeWav(char *filename, float *signal, int signalSize)
+void writeWav(string filename, float *signal, int signalSize)
 {
 
-	ofstream outputfile(filename, ios::out | ios::binary);
+	ofstream outputfile(filename.c_str(), ios::out | ios::binary);
 	// PCM = 18 was unnecessary
 	subChunk1Size = 16;
 
@@ -360,4 +337,26 @@ void convolutionProcess(float *x,int inputSignalSize,float * h,int responseSigna
 
 	unpadArray(complexResult, y, outputSignalSize);
 	scaleSignal(y, outputSignalSize);
+}
+
+string requestFileName(string fileNameIn)
+{
+    cout << "Please enter the path for the "<<fileNameIn<<" file." << endl;
+    string retValue = "";
+    cin >> retValue;
+
+    // check for valid input
+     if(retValue == "" || retValue.length() < 1)
+    {
+            cout << "You didn't enter in a valid file name!" << endl;
+            return 0;
+    }
+
+    //add correct file extension
+    if(retValue.length() < 4)
+            retValue = retValue + ".wav";
+    else if(retValue.substr(retValue.length() - 4,4) != ".wav")
+            retValue = retValue + ".wav";
+
+    return retValue;
 }
