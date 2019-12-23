@@ -1,25 +1,15 @@
 // necessary libraries
 
 #include <stdlib.h>
-
 #include <stdio.h>
-
 #include <stdint.h>
-
 #include <string.h>
-
 #include <iostream>
-
 #include <fstream>
-
 #include <math.h>
-
 #include <ctime>
 
-#
-define SWAP(a, b) tempr = (a);
-(a) = (b);
-(b) = tempr
+#define SWAP(a,b)  tempr=(a);(a)=(b);(b)=tempr
 
 using namespace std; // bad practice in professional applications but it shouldnt cause issue in our case.
 
